@@ -26,10 +26,11 @@
         <img src='bots/T.jpg'/> <span>Target place</span>
     	</div>
         <br/>
-    	Goal: push GREEN bots to touch WHITE space
-       	Game Level: <font color=GREEN id='game-level'>1</font>
+    	Goal: push GREEN bots to touch WHITE space<br/>
+       	Game Level: <font color=GREEN id='game-level'><b>1</b></font><br/>
         <button id='prev' onClick="go_prev()">Lower Level</button>
         <button id='next' onClick="go_next()">Higher Level</button>
+        <button id='refresh' onClick="set.start_game()">No Solution? Restart Game!</button> 
 </div>
 <div id='game-screen' style='width:450px;min-height:480px;position:fixed;border-width:0px;top:0px;left:30px;'>
 	<div id='tip' style='width:450px;height:30px;line-height:30px;border-width:0px;background-color:#000;color:#FFF;font-size:0.8em;font-family:Consolas;Lucida Consolas,Terminal;text-align:center;'></div>
