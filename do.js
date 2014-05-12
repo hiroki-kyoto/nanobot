@@ -19,6 +19,14 @@ icons['T'].src = 'bots/T.jpg';
 
 var cv = document.getElementById('can');
 cv.style.cursor = 'crosshair';
+
+// check if their browser could support the game
+if(typeof cv.getContext=='undefined')
+{
+	alert("Sorry! We browser doesn't support our game, we need HTML5 CANVAS ELEMENT support!"
+	+" \r\n Plz update to IE9 or download Chrome or Firefox browser.");
+}
+
 var ctx = cv.getContext('2d');
 
 //console.log(ctx);
@@ -32,12 +40,25 @@ set.screen=document.getElementById('game-screen');
 set.screen.x=parseInt(set.screen.style.left);
 set.screen.y=parseInt(set.logee.style.height);
 set.session=0;
-set.source=[];
-set.target=[];
+set.source=0;
+set.target=0;
 set.time=0;
 set.unit=100;
 set.interval=0;
 set.bots=[];
+set.base=1;
+set.h_rate=0.02;
+set.v_rate=0.02;
+set.o_rate=0.02;
+set.level=0;
+set.mode=[];
+set.mode[0]=1;
+set.mode[1]=5;
+set.mode[2]=10;
+set.mode[3]=20;
+set.mode[4]=30;
+set.mode[5]=40;
+set.mode[6]=50;
 set.start_game=function(){};
 set.end_game=function(){};
 set.get_distance=function(s,t)
@@ -153,7 +174,7 @@ function erase(x,y)
 /*** function definition end ***/
 
 /*** some post-function sets are created here ***/
-set.im=create();
+//set.im=create();
 
 /*** class ***/
 /**
@@ -186,15 +207,22 @@ var bot=(function()
 				return type;
 			};
 			// some initial action
-			//register
-			if(set.m[x][y]==0)
+			//register in loop until meet a untaken seat
+			function register()
 			{
-				set.m[x][y]=me;	
-			}
-			else
-			{
-				set.log('ERROR WHEN ATEMPTING TO PUT BOTS ON POSITION('+x+','+y+')');
-			}
+				if(set.m[x][y]==0)
+				{
+					set.m[x][y]=me;	
+				}
+				else
+				{
+					x=Math.floor(1+Math.random()*(set.w-2));
+					y=Math.floor(1+Math.random()*(set.h-2));
+					register();
+				}	
+			};
+			// run it 
+			register();
 			
 			this.print=function()
 			{
@@ -607,10 +635,19 @@ var put=(function()
 
 var detect=(function()
 {
-	return function()
+	return function(evnt)
 	{
 		// detect if a bot is touched
 		var p1=[];
+		if(typeof event == 'undefined')
+		{
+			var event = evnt; 
+			if(typeof event=='undefined'||event==null)
+			{
+				event = window.event;
+			}
+		}
+		
 		p1.x=event.clientX-set.screen.x;
 		p1.y=event.clientY-set.screen.y;
 		// map the mouse position to 
@@ -678,20 +715,119 @@ set.generate_scene=(function()
 {
 	return function()
 	{
-		set.source=new bot({name:'S1',x:13,y:7,type:'S'});
+		// clear the scene
+		// erase all bots
+		for(var name in set.bots)
+		{
+			var i=set.bots[name];
+			erase(i.get_x(),i.get_y());
+		}
+		
+		// clear source and target
+		if(set.source!=0)
+		{
+			erase(set.source.get_x(),set.source.get_y());	
+		}
+		if(set.target!=0)
+		{
+			erase(set.target.get_x(),set.target.get_y());
+		}
+		set.source=0;
+		set.target=0;
+		
+		set.session=0;
+		set.bots=[];
+		set.m=(function() // m is map of all registered bots
+		{
+			var m=new Array();
+			for(var i=0;i<set.w;i++)
+			{
+				m[i]=new Array();
+				for(var j=0;j<set.h;j++)
+				{
+					// means the place is not taken by any bot
+					m[i][j]=0;	
+				}
+			}
+			return m;
+		})();
+		
+		//generate all new ones
+		var p={
+			x:Math.floor(set.w/2),
+			y:Math.floor(set.h/2)
+			};
+		set.source=new bot({
+			name:'S1',
+			x:p.x,
+			y:p.y,
+			type:'S'
+		});
 		set.source.draw();
 		
-		set.bots['H1']=new bot({name:'H1',x:6,y:12,type:'H'});
-		set.bots['H1'].draw();
-
-		set.bots['V1']=new bot({name:'V1',x:10,y:9,type:'V'});
-		set.bots['V1'].draw();
-		
-		set.bots['O1']=new bot({name:'O1',x:9,y:8,type:'O'});
-		set.bots['O1'].draw();
-		
-		set.target=new bot({name:'T1',type:'T',x:10,y:16});
+		set.target=new bot({
+			name:'T1',
+			x:p.x,
+			y:p.y,
+			type:'T'
+		});
 		set.target.draw();
+		
+		// according the game level to create game scenes
+		var hn=Math.floor(set.base+set.w*set.h*set.h_rate);
+		var vn=Math.floor(set.base+set.w*set.h*set.v_rate);
+		var on=Math.floor(set.mode[set.level]+set.w*set.h*set.o_rate);
+		// horizontal bots
+		for(var i=0;i<hn;i++)
+		{
+			set.bots['H'+i]=new bot({
+				name:'H'+i,
+				x:p.x,
+				y:p.y,
+				type:'H'
+			});
+			set.bots['H'+i].draw();
+		}
+		
+		// vertical bots
+		for(var i=0;i<vn;i++)
+		{
+			set.bots['V'+i]=new bot({
+				name:'V'+i,
+				x:p.x,
+				y:p.y,
+				type:'V'
+			});
+			set.bots['V'+i].draw();
+		}
+		
+		// obstacles
+		for(var i=0;i<on;i++)
+		{
+			set.bots['O'+i]=new bot({
+				name:'O'+i,
+				x:p.x,
+				y:p.y,
+				type:'O'
+			});
+			set.bots['O'+i].draw();
+		}
+		
+		function rand(n)
+		{
+			return Math.floor(Math.random()*n);
+		};
+		
+		// a shining flash
+		for(var i=0;i<hn;i++)
+		{
+			set.bots['H'+i].move_to({x:rand(set.w),y:0});
+		}
+		for(var j=0;j<hn;j++)
+		{
+			set.bots['V'+j].move_to({x:0,y:rand(set.h)});
+		}
+		
 	};	
 })();
 
@@ -716,7 +852,7 @@ set.start_game=(function()
 		set.time=0;
 		if(set.interval!=0)
 		{
-			cleartInterval(set.interval);
+			clearInterval(set.interval);
 		}
 		set.interval=setInterval(function()
 		{
@@ -742,28 +878,18 @@ set.end_game=(function()
 
 set.start_game();
 
-// a flash
-var n=30;
-var n1=30;
-var timer=setInterval(function(){
-		if(--n>0)
-		{
-			set.bots['V1'].move_down();	
-		}
-		else
-		{
-			clearInterval(timer);
-		}
-	},set.unit);
-	
-// A QUIZ
-var timer1=setInterval(function(){
-		if(--n1>0)
-		{
-			set.bots['H1'].move_right();
-		}
-		else
-		{
-			clearInterval(timer1);
-		}
-	},set.unit);
+// game level change
+var game_level = document.getElementById('game-level');
+function go_prev()
+{
+	set.level=set.level-1>=0?set.level-1:0;
+	game_level.innerHTML = set.level+1;
+	set.start_game();
+};
+
+function go_next()
+{
+	set.level=set.level+1<=set.mode.length-1?set.level+1:set.mode.length-1;
+	game_level.innerHTML = set.level+1;
+	set.start_game();
+};
