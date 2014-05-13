@@ -1,6 +1,11 @@
+/*** 
+* Author: Chao Xiang
+* Update: May, 2014
+* File  : do.js
+****/
 /*** load some resource from remote server begin ***/
 
-var icons=[];
+var icons = [];
 icons['S'] = new Image();
 icons['S'].src = 'bots/S.jpg';
 icons['H'] = new Image();
