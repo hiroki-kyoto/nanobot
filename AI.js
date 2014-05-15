@@ -21,7 +21,7 @@
 
 // AI Algorithm test
 /*** Easy Move for AI Processing Actions ***/
-var actions=(function()
+var actions = (function ()
 {
 	// goes to the direction that enables the source bot to get close the target
 	this.start_random_mode=function()
@@ -36,7 +36,9 @@ var actions=(function()
         // o is instance of bot
 	    return function(o,p)
         {
-            // move a bot to certain position p(x,y)
+            // move a bot to certain position p(x,y), from o.p(x0,y0)
+            // in equation form, it is: move(o, o.p.x, o.p.y, p.x, p.y)
+            if()
         }
 	    })();
 	
