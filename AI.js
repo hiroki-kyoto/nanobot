@@ -31,7 +31,7 @@ var actions = (function ()
 	    
 	};
 	// V=F1(H)
-	this.reach=(function(){
+	this.move=(function(){
         // p is instance of Point(x,y)
         // o is instance of bot
 	    return function(o,p)
