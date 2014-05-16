@@ -49,12 +49,35 @@ var actions=(function()
             // in equation form, it is: move(o, o.p.x, o.p.y, p.x, p.y)
             if(!(o instanceof bot))
             {
-                set.log('Error, '+o.toString()+' is not a bot, cannot do action[move].');
+                set.log('Error, '+o+' is not a bot, cannot do action[move].');
+                return false;
+            }
+            if(!(o instanceof point))
+            {
+                set.log('Error, '+p+' is not a point, cannot do action[move].');
                 return false;
             }
             if(o.type=='H'&&o.get_y()==p.y)
             {
+                o.move_to(p);
+                return true;
+            }
+            if(o.type=='V'&&o.get_x()==p.x)
+            {
+                o.move_to(p);
+                return true;
+            }
+            // if this move is a compicated one that cannot be realized
+            // by simply set the bot there, but use others' push
+            if(o.type=='H')
+            {
+                // this move will be finished by two crossed action
+                // firstly, complete the horizontal move
+                o.move_to(p);
+                // secondly use the push way
                 
+                
+                return true;
             }
         }
     })();
