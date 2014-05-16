@@ -30,7 +30,19 @@ var point=(function()
     };
 })();
 
-var actions=(function()
+// we need a stack to push those actions, and then push them into a pipeline
+var pipeline=(function(){
+    return function(){
+        var acts=[];
+        this.push=function(move){
+            var b=move.b; // bot 
+            var p=move.p; // position
+            
+        };
+    };
+})();
+
+var action=(function()
 {
 	// goes to the direction that enables the source bot to get close the target
 	this.start_random_mode=function()
@@ -39,7 +51,13 @@ var actions=(function()
 	    // target
 	    
 	};
-	// V=F1(H)
+	
+    // push action is just a logic link of different actions
+    this.push=(function(){
+        return function(o,p){
+            
+        };
+    });
 	this.move=(function(){
         // p is instance of Point(x,y)
         // o is instance of bot

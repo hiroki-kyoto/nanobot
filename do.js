@@ -600,7 +600,7 @@ var bot=(function()
 					move_steps(me.move_up,Math.abs(dis.dy));
 				}
 			};
-			
+            
 			return me;	
 		};
 })();
