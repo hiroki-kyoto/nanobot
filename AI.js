@@ -33,11 +33,22 @@ var point=(function()
 // we need a stack to push those actions, and then push them into a pipeline
 var pipeline=(function(){
     return function(){
+        var me=this;
         var acts=[];
         this.push=function(move){
             var b=move.b; // bot 
             var p=move.p; // position
-            
+            acts.push({'bot':b,'position':p});
+        };
+        this.pop=function(){
+            var m=acts.pop();
+            m.bot.move_to(m.position);
+        };
+        this.empty=function(){
+            while(acts.length>0)
+            {
+                me.pop();
+            }
         };
     };
 })();
