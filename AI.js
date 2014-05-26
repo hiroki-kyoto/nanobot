@@ -42,12 +42,15 @@ var pipeline=(function(){
         };
         this.pop=function(){
             var m=acts.pop();
-            m.bot.move_to(m.position);
+            return m.bot.move_to(m.position);
         };
         this.empty=function(){
             while(acts.length>0)
             {
-                me.pop();
+                if(!me.pop())
+                {
+                    set.log('This method is not available!Try next.');    
+                }
             }
         };
     };
@@ -62,13 +65,7 @@ var action=(function()
 	    // target
 	    
 	};
-	
-    // push action is just a logic link of different actions
-    this.push=(function(){
-        return function(o,p){
-            
-        };
-    });
+    // unit general action
 	this.move=(function(){
         // p is instance of Point(x,y)
         // o is instance of bot
@@ -96,19 +93,98 @@ var action=(function()
                 o.move_to(p);
                 return true;
             }
-            // if this move is a compicated one that cannot be realized
-            // by simply set the bot there, but use others' push
-            if(o.type=='H')
+        };
+    })();
+})();
+
+// some struct that would be constantly used
+set.type=[];
+type.S='S';
+type.H='H';
+type.V='V';
+type.T='T';
+type.O='O';
+
+var brain=(function(){
+    return function(){
+        var me=this;
+        // search for vacant space
+        // o is instance of bot
+        // d is int type
+        me.check_walkable=function(o,d)
+        {
+            d=parseInt(d);
+            if(d==0)
             {
-                // this move will be finished by two crossed action
-                // firstly, complete the horizontal move
-                o.move_to(p);
-                // secondly use the push way
-                
-                
                 return true;
             }
-        }
-    })();
-	
+            else
+            {
+                var v=d>0?1:-1;
+            }
+            if(o instanceof bot==false)
+            {
+                return false;
+                console.log('in function check_walkable, argument o is not an instance of bot.');
+            }
+            if(o.get_type()==set.type.H)
+            {
+                var x=o.get_x();
+                var y=o.get_y();
+                for(var i=x+v;i==x+d;i+=v)
+                {
+                    var e=set.m[i][y];
+                    if(e!=0)
+                    {
+                        var t=e.get_type();
+                        if(t==set.type.T||t==set.type.O)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            if(o.get_type()==set.type.V)
+            {
+                var x=o.get_x();
+                var y=o.get_y();
+                for(var i=y+v;i==y+d;i+=v)
+                {
+                     var e=set.m[x][i];
+                    if(e!=0)
+                    {
+                        var t=e.get_type();
+                        if(t==set.type.T||t==set.type.O)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            
+            return true;
+        };
+        
+        me.work=function(){
+            // according to the logic rules to move
+            // find a pair HV bots that can meet
+            for(var i in set.bots)
+            {
+                for(var j in set.bots)
+                {
+                    if(i.get_type()=='H'&&j.get_type()=='V')
+                    {
+                        // check if they can meet together
+                        var dx=j.get_x()-i.get_x();
+                        var dy=i.get_y()-j.get_y();
+                        
+                        var j1=me.check_walkable(i,dx);
+                        var j2=me.check_walkable(j,dy);
+                        
+                    }
+                }
+            }
+            
+        };
+    };
 })();
